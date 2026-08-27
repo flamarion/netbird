@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzJmNDNkNiIvPjxnIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIj48cGF0aCBkPSJNOSAxNmgxNCIvPjxwYXRoIGQ9Ik0xNiA5djE0Ii8+PC9nPjxjaXJjbGUgY3g9IjkiIGN5PSIxNiIgcj0iMyIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjIzIiBjeT0iMTYiIHI9IjMiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjkiIHI9IjMiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjIzIiByPSIzIiBmaWxsPSIjZmZmIi8+PC9zdmc+">
-<title>Summit Infrastructure x NetBird | Technical Case</title>
+<title>Summit Infrastructure x NetBird | Technical Design</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="A phased design for replacing FortiGate SSL VPN and site-to-site IPsec with a self-hosted NetBird overlay.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,19 +88,17 @@ h2{font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(19px,2.6vw,2
 .shortcut{margin-top:1.5em;padding:1em 1.2em;border-left:3px solid var(--accent);background:var(--accent-tint);border-radius:0 9px 9px 0;font-size:clamp(13px,1.4vw,15px);color:var(--ink)}
 .shortcut b{font-weight:600}
 
-/* about */
-.about{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:clamp(20px,2.6vw,30px)}
-.about h3{font-family:"Archivo",sans-serif;font-size:clamp(15px,1.7vw,18px);margin:0 0 .5em;font-weight:700}
-.about h3+p{margin-top:0}
-.about p{color:var(--muted);font-size:clamp(13px,1.4vw,15px);margin:0 0 1.3em;max-width:70ch}
-.about dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.55em 1.3em;font-size:clamp(13px,1.4vw,15px)}
-.about dt{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);font-weight:600;white-space:nowrap;padding-top:.15em}
-.about dd{margin:0;color:var(--muted)}
-.note{margin-top:1.4em;padding-top:1.2em;border-top:1px solid var(--line);font-size:clamp(12.5px,1.35vw,14px);color:var(--faint)}
+/* scope */
+.scope{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:clamp(20px,2.6vw,30px)}
+.scope>p{color:var(--muted);font-size:clamp(13.5px,1.5vw,16px);margin:0 0 1.5em;max-width:72ch}
+.later{border-left:3px solid var(--accent);background:var(--accent-tint);border-radius:0 9px 9px 0;padding:1em 1.2em}
+.later .lbl{display:block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:.7em}
+.later ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:.45em}
+.later li{color:var(--muted);font-size:clamp(13px,1.4vw,15px);line-height:1.45}
+.later li::marker{color:var(--accent)}
 
 footer{padding:clamp(30px,5vw,54px) 0;border-top:1px solid var(--line);margin-top:clamp(20px,4vw,40px)}
 footer .wrap{display:flex;flex-wrap:wrap;gap:1em 2em;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint)}
-@media (max-width:640px){ .about dl{grid-template-columns:1fr;gap:.2em} .about dd{margin-bottom:.7em} }
 </style>
 </head>
 <body>
@@ -118,7 +116,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:1em 2em;font-family:"IBM Plex Mono"
 
   <header class="hero">
     <div class="rule"></div>
-    <div class="eyebrow">Technical Case | SE | Part I</div>
+    <div class="eyebrow">Technical Design | Part I</div>
     <h1>Replacing the VPN, rebuilding the network.</h1>
     <p class="lede">A phased design for moving Summit Infrastructure off FortiGate SSL VPN and site-to-site IPsec, onto a self-hosted NetBird overlay, without disrupting what the firewall enforces today.</p>
     <div class="metarow">
@@ -186,24 +184,19 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:1em 2em;font-family:"IBM Plex Mono"
   </section>
 
   <section>
-    <h2>About this submission</h2>
-    <div class="about">
-      <h3>Scope</h3>
-      <p>Both documents are written in the role: addressed to Justin at Summit Infrastructure, as the follow-up to a discovery call and a successful open-source proof of concept. Recommendations are made rather than deferred, and where something falls outside what NetBird solves, it says so.</p>
-
-      <h3>How AI was used</h3>
-      <p>I used AI (Claude) throughout, as a research assistant and a drafting tool. The architecture decisions, the review and the revisions are mine.</p>
-      <dl>
-        <dt>Research</dt>
-        <dd>Working through the NetBird documentation: routing peers, the Networks, Resources and Policies model, DNS handling, high-availability routes, ephemeral peers, and which capabilities sit in the Enterprise tier.</dd>
-        <dt>Regulatory</dt>
-        <dd>The area I leaned on it most heavily. Mapping the design against CMMC Level 2 and NIST 800-171, and reasoning through the FIPS question around WireGuard.</dd>
-        <dt>Deliverables</dt>
-        <dd>AI drafted the presentation and the write-up from my direction and my earlier notes. I reviewed and revised both across several iterations, cut what did not belong, and rewrote the framing.</dd>
-        <dt>Diagrams</dt>
-        <dd>AI produced the first-pass topologies. I rebuilt all of them in Lucidchart and used AI to sanity-check the result, which caught that my site-to-site view implied hub routing rather than a peer-to-peer mesh.</dd>
-      </dl>
-      <p class="note">Prepared as Part I of the NetBird Solutions Engineer technical case.</p>
+    <h2>Scope of this design</h2>
+    <p class="sublede">What Part I covers, and what deliberately comes later.</p>
+    <div class="scope">
+      <p>This is the design across all three phases: what gets built, where it sits, how access is granted, and the order it rolls out in. It is written to be decided on, so recommendations are made rather than deferred, and where something falls outside what NetBird solves, it says so plainly.</p>
+      <div class="later">
+        <span class="lbl">Comes after the working session</span>
+        <ul>
+          <li>Implementation runbooks and the exact FortiGate rule set, once we have walked the current policy together</li>
+          <li>The identity build, which depends on the provider decision in section 6 of the write-up</li>
+          <li>Pilot scheduling and the user list, around any change freeze on your side</li>
+          <li>Phase 3 site sequencing, which follows the per-site link and failover review</li>
+        </ul>
+      </div>
     </div>
   </section>
 
