@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzJmNDNkNiIvPjxnIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIj48cGF0aCBkPSJNOSAxNmgxNCIvPjxwYXRoIGQ9Ik0xNiA5djE0Ii8+PC9nPjxjaXJjbGUgY3g9IjkiIGN5PSIxNiIgcj0iMyIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjIzIiBjeT0iMTYiIHI9IjMiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjkiIHI9IjMiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjIzIiByPSIzIiBmaWxsPSIjZmZmIi8+PC9zdmc+">
+<title>Summit Infrastructure x NetBird | Technical Case</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A phased design for replacing FortiGate SSL VPN and site-to-site IPsec with a self-hosted NetBird overlay.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef1f6; --bg-grid:#dbe2ec;
+  --surface:#ffffff; --surface-2:#f6f8fc;
+  --ink:#131820; --muted:#5b6675; --faint:#8b95a3;
+  --line:#c8d1dd; --accent:#2f43d6; --accent-tint:rgba(47,67,214,.07);
+  --shadow:0 1px 2px rgba(20,30,50,.04),0 8px 30px rgba(20,30,50,.06);
+}
+
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; min-height:100vh;
+  background:
+    linear-gradient(var(--bg-grid) 1px,transparent 1px) 0 0/34px 34px,
+    linear-gradient(90deg,var(--bg-grid) 1px,transparent 1px) 0 0/34px 34px,
+    var(--bg);
+  color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  line-height:1.55;
+}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.wrap{max-width:1060px;margin:0 auto;padding:0 clamp(18px,4vw,32px)}
+
+/* top bar */
+.topbar{border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--surface) 82%,transparent);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10}
+.topbar .wrap{display:flex;align-items:center;gap:1.2em;height:56px}
+.brand{display:flex;align-items:center;gap:.55em;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.brand .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.topnav{margin-left:auto;display:flex;gap:.4em;align-items:center}
+.topnav a{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);text-decoration:none;padding:.45em .75em;border-radius:7px;border:1px solid transparent}
+.topnav a:hover{color:var(--accent);border-color:var(--line);background:var(--surface)}
+.topnav a.here{color:var(--accent);border-color:var(--line);background:var(--surface)}
+
+
+
+/* hero */
+.hero{padding:clamp(44px,8vw,88px) 0 clamp(28px,4vw,44px)}
+.rule{width:60px;height:4px;background:var(--accent);border-radius:3px;margin-bottom:1.5em}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:clamp(10px,1.1vw,12.5px);letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:1.1em}
+h1{font-family:"Archivo",sans-serif;font-weight:800;font-size:clamp(30px,5.4vw,58px);line-height:1.02;letter-spacing:-.025em;margin:0 0 .38em;text-wrap:balance;max-width:19ch}
+.lede{font-size:clamp(15px,1.9vw,21px);color:var(--muted);max-width:60ch;margin:0;line-height:1.45}
+.metarow{margin-top:clamp(28px,4vw,44px);display:flex;flex-wrap:wrap;gap:clamp(1.4em,4vw,3em);font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint)}
+.metarow b{display:block;color:var(--ink);font-weight:600;font-size:13.5px;margin-top:.3em}
+
+/* sections */
+section{padding:clamp(30px,5vw,52px) 0}
+h2{font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(19px,2.6vw,29px);letter-spacing:-.015em;margin:0 0 .2em;line-height:1.12}
+.sublede{color:var(--muted);margin:0 0 1.6em;font-size:clamp(13.5px,1.5vw,16px);max-width:62ch}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(14px,2vw,20px)}
+.card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:clamp(20px,2.6vw,28px);text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:border-color .18s,transform .18s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card .kind{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.card h3{font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(18px,2.1vw,23px);margin:.5em 0 .35em;line-height:1.15}
+.card p{margin:0 0 1.2em;color:var(--muted);font-size:clamp(13px,1.4vw,15px)}
+.card ul{margin:0 0 1.4em;padding-left:1.1em;color:var(--muted);font-size:clamp(12.5px,1.35vw,14px);display:flex;flex-direction:column;gap:.34em}
+.card ul li::marker{color:var(--accent)}
+.card .go{margin-top:auto;display:flex;align-items:center;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);font-weight:600;padding-top:.9em;border-top:1px solid var(--line)}
+.card .go .time{color:var(--faint);font-weight:400}
+
+/* path */
+.path{border:1px solid var(--line);border-radius:14px;background:var(--surface-2);padding:clamp(20px,2.6vw,30px)}
+.step{display:grid;grid-template-columns:auto 1fr;gap:1.1em;padding:.85em 0;border-bottom:1px solid var(--line)}
+.step:last-of-type{border-bottom:0;padding-bottom:0}
+.step .n{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--accent);font-size:13px;padding-top:.15em}
+.step h4{margin:0 0 .2em;font-size:clamp(14px,1.5vw,16.5px);font-weight:600}
+.step p{margin:0;color:var(--muted);font-size:clamp(13px,1.4vw,15px)}
+.shortcut{margin-top:1.5em;padding:1em 1.2em;border-left:3px solid var(--accent);background:var(--accent-tint);border-radius:0 9px 9px 0;font-size:clamp(13px,1.4vw,15px);color:var(--ink)}
+.shortcut b{font-weight:600}
+
+/* about */
+.about{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:clamp(20px,2.6vw,30px)}
+.about h3{font-family:"Archivo",sans-serif;font-size:clamp(15px,1.7vw,18px);margin:0 0 .5em;font-weight:700}
+.about h3+p{margin-top:0}
+.about p{color:var(--muted);font-size:clamp(13px,1.4vw,15px);margin:0 0 1.3em;max-width:70ch}
+.about dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:.55em 1.3em;font-size:clamp(13px,1.4vw,15px)}
+.about dt{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);font-weight:600;white-space:nowrap;padding-top:.15em}
+.about dd{margin:0;color:var(--muted)}
+.note{margin-top:1.4em;padding-top:1.2em;border-top:1px solid var(--line);font-size:clamp(12.5px,1.35vw,14px);color:var(--faint)}
+
+footer{padding:clamp(30px,5vw,54px) 0;border-top:1px solid var(--line);margin-top:clamp(20px,4vw,40px)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:1em 2em;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--faint)}
+@media (max-width:640px){ .about dl{grid-template-columns:1fr;gap:.2em} .about dd{margin-bottom:.7em} }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">
+  <span class="brand"><span class="dot"></span>SUMMIT&nbsp;x&nbsp;NETBIRD</span>
+  <nav class="topnav">
+    <a href="./" class="here">Overview</a>
+    <a href="./write-up.html">Write-up</a>
+    <a href="./deck.html">Presentation</a>
+  </nav>
+</div></div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="rule"></div>
+    <div class="eyebrow">Technical Case | SE | Part I</div>
+    <h1>Replacing the VPN, rebuilding the network.</h1>
+    <p class="lede">A phased design for moving Summit Infrastructure off FortiGate SSL VPN and site-to-site IPsec, onto a self-hosted NetBird overlay, without disrupting what the firewall enforces today.</p>
+    <div class="metarow">
+      <div>Prepared for<b>Justin, Technical Lead, Summit Infrastructure</b></div>
+      <div>Author<b>Flamarion Jorge</b></div>
+      <div>Date<b>August 2026</b></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>Two deliverables</h2>
+    <p class="sublede">The presentation carries the rollout story and the topology. The write-up answers the design questions for each phase. They are meant to be read together, in that order.</p>
+    <div class="cards">
+
+      <a class="card" href="./deck.html">
+        <span class="kind">Presentation | 12 slides</span>
+        <h3>The rollout plan</h3>
+        <p>Current state, the three phases, and the end state, told through the network topology at each step.</p>
+        <ul>
+          <li>What stays, what is removed, what is added, at every phase</li>
+          <li>Four topology diagrams on a consistent layout</li>
+          <li>Speaker notes on each slide (press <span class="mono">N</span>)</li>
+        </ul>
+        <span class="go">Open the presentation <span class="time">~10 min</span></span>
+      </a>
+
+      <a class="card" href="./write-up.html">
+        <span class="kind">Technical write-up</span>
+        <h3>The design, phase by phase</h3>
+        <p>Direct answers to the architecture, identity, audit, operational and site-to-site questions, with assumptions and open items called out.</p>
+        <ul>
+          <li>Phase 1: architecture, placement, policy transition, AD and Duo, audit trail</li>
+          <li>Phase 2: the four recurring tasks, scoped honestly</li>
+          <li>Phase 3: topology, high availability, risks around SCADA</li>
+        </ul>
+        <span class="go">Read the write-up <span class="time">~15 min</span></span>
+      </a>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Suggested path</h2>
+    <p class="sublede">Both documents are written for a technical reader who has already run the NetBird open-source build and wants to know what production looks like.</p>
+    <div class="path">
+      <div class="step">
+        <span class="n">01</span>
+        <div><h4>Start with the presentation</h4>
+        <p>It sets the shape of the migration in ten minutes: where the overlay sits, what changes at each phase, and what the network looks like when it is done.</p></div>
+      </div>
+      <div class="step">
+        <span class="n">02</span>
+        <div><h4>Then the write-up, in order or by section</h4>
+        <p>Each phase answers its questions under its own heading, so it can be read straight through or jumped into. Assumptions and open items sit at the end of each phase.</p></div>
+      </div>
+      <div class="step">
+        <span class="n">03</span>
+        <div><h4>Bring the open items to the walkthrough</h4>
+        <p>A handful of decisions need Summit's input, particularly around identity hosting and how the assessor scopes CUI-bearing paths. Those are flagged rather than assumed.</p></div>
+      </div>
+      <div class="shortcut">
+        <b>If you only have five minutes:</b> slides 3, 5 and 11 of the presentation, which are the current state, Phase 1 and the end state, then section 6 of the write-up, which is the three design decisions and their reasoning.
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>About this submission</h2>
+    <div class="about">
+      <h3>Scope</h3>
+      <p>Both documents are written in the role: addressed to Justin at Summit Infrastructure, as the follow-up to a discovery call and a successful open-source proof of concept. Recommendations are made rather than deferred, and where something falls outside what NetBird solves, it says so.</p>
+
+      <h3>How AI was used</h3>
+      <p>I used AI (Claude) throughout, as a research assistant and a drafting tool. The architecture decisions, the review and the revisions are mine.</p>
+      <dl>
+        <dt>Research</dt>
+        <dd>Working through the NetBird documentation: routing peers, the Networks, Resources and Policies model, DNS handling, high-availability routes, ephemeral peers, and which capabilities sit in the Enterprise tier.</dd>
+        <dt>Regulatory</dt>
+        <dd>The area I leaned on it most heavily. Mapping the design against CMMC Level 2 and NIST 800-171, and reasoning through the FIPS question around WireGuard.</dd>
+        <dt>Deliverables</dt>
+        <dd>AI drafted the presentation and the write-up from my direction and my earlier notes. I reviewed and revised both across several iterations, cut what did not belong, and rewrote the framing.</dd>
+        <dt>Diagrams</dt>
+        <dd>AI produced the first-pass topologies. I rebuilt all of them in Lucidchart and used AI to sanity-check the result, which caught that my site-to-site view implied hub routing rather than a peer-to-peer mesh.</dd>
+      </dl>
+      <p class="note">Prepared as Part I of the NetBird Solutions Engineer technical case.</p>
+    </div>
+  </section>
+
+</div>
+
+<footer><div class="wrap">
+  <span>Flamarion Jorge</span><span>|</span>
+  <span>Summit x NetBird, Technical Design Part I</span><span>|</span>
+  <span>August 2026</span>
+</div></footer>
+
+</body>
+</html>
