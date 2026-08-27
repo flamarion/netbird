@@ -208,6 +208,10 @@ figcaption b{color:var(--ink);font-weight:600}
 .brand{position:absolute;top:14px;left:18px;z-index:20;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.05em;color:var(--faint);display:flex;align-items:center;gap:.5em;pointer-events:none}
 .brand b{color:var(--muted);font-weight:600}
 .brand .bd{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.decknav{position:absolute;top:12px;right:16px;z-index:20;display:flex;gap:.4em;align-items:center}
+.decknav a{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);text-decoration:none;padding:.42em .75em;border-radius:7px;border:1px solid var(--line);background:var(--surface);transition:color .15s,border-color .15s}
+.decknav a:hover{color:var(--accent);border-color:var(--accent)}
+.decknav a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .nav{position:absolute;bottom:12px;right:16px;z-index:20;display:flex;align-items:center;gap:.5em}
 .nav button{font-family:"IBM Plex Mono",monospace;font-size:13px;width:30px;height:30px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s}
 .nav button:hover{border-color:var(--accent);color:var(--accent)}
@@ -244,13 +248,17 @@ figcaption b{color:var(--ink);font-weight:600}
   body{background:#fff;overflow:visible;display:block}
   .stage{width:100%;height:auto;box-shadow:none;border:none;border-radius:0}
   .slide{display:flex!important;position:relative;opacity:1!important;page-break-after:always;height:100vh;animation:none}
-  .nav,.dots,.counter,
+  .nav,.dots,.counter,.progress,.hint,.notes-panel,.brand,.decknav{display:none}
 }
 </style>
 
 <div class="stage" id="stage">
   <div class="progress" id="progress"></div>
-  <a class="brand" href="./" style="pointer-events:auto;text-decoration:none"><span class="bd"></span><b>SUMMIT&nbsp;x&nbsp;NETBIRD</b>&nbsp;/ back to overview</a>
+  <a class="brand" href="./" style="pointer-events:auto;text-decoration:none"><span class="bd"></span><b>SUMMIT&nbsp;x&nbsp;NETBIRD</b>&nbsp;/ migration design</a>
+  <nav class="decknav">
+    <a href="./">Overview</a>
+    <a href="./write-up.html">Write-up</a>
+  </nav>
 
   <!-- ============ 1 | TITLE ============ -->
   <section class="slide title-slide active">
