@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzJmNDNkNiIvPjxnIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIj48cGF0aCBkPSJNOSAxNmgxNCIvPjxwYXRoIGQ9Ik0xNiA5djE0Ii8+PC9nPjxjaXJjbGUgY3g9IjkiIGN5PSIxNiIgcj0iMyIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjIzIiBjeT0iMTYiIHI9IjMiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjkiIHI9IjMiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjIzIiByPSIzIiBmaWxsPSIjZmZmIi8+PC9zdmc+">
+<title>Presenter View | Summit x NetBird</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --surface-2:#f6f8fc;
+  --ink:#131820; --muted:#5b6675; --faint:#8b95a3; --line:#c8d1dd;
+  --accent:#2f43d6; --accent-tint:rgba(47,67,214,.07);
+  --shadow:0 1px 2px rgba(20,30,50,.04),0 8px 30px rgba(20,30,50,.06);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;line-height:1.55;
+  display:flex;flex-direction:column;
+}
+.bar{
+  flex:none;display:flex;align-items:center;gap:1em;
+  padding:.75em clamp(14px,2.2vw,26px);
+  background:var(--surface);border-bottom:1px solid var(--line);
+}
+.tag{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.counter{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted)}
+.counter b{color:var(--ink);font-size:16px}
+.timer{
+  margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+  padding:.32em .7em;cursor:pointer;user-select:none;font-variant-numeric:tabular-nums;
+}
+.timer:hover{border-color:var(--accent);color:var(--accent)}
+.timer.paused{color:var(--faint)}
+
+main{flex:1;min-height:0;overflow:auto;padding:clamp(16px,2.4vw,30px) clamp(14px,2.2vw,26px)}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;
+  box-shadow:var(--shadow);padding:clamp(20px,2.6vw,32px);max-width:80ch;margin:0 auto;
+}
+h1{font-family:"Archivo",sans-serif;font-weight:700;font-size:clamp(19px,2.6vw,27px);
+   line-height:1.15;margin:0 0 .8em;letter-spacing:-.015em;text-wrap:balance}
+ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:.75em}
+li{font-size:clamp(15px,1.7vw,19px);line-height:1.5}
+li::marker{color:var(--accent)}
+li b{font-weight:600}
+
+.next{
+  max-width:80ch;margin:clamp(14px,2vw,20px) auto 0;padding:.85em 1.1em;
+  border:1px dashed var(--line);border-radius:11px;background:var(--surface-2);
+  font-size:14px;color:var(--muted);
+}
+.next .lbl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);font-weight:600;margin-right:.7em}
+.next b{color:var(--ink);font-weight:600}
+
+.foot{
+  flex:none;display:flex;align-items:center;gap:.6em;
+  padding:.7em clamp(14px,2.2vw,26px);background:var(--surface);border-top:1px solid var(--line);
+}
+.foot button{
+  font-family:"IBM Plex Mono",monospace;font-size:14px;padding:.55em 1.1em;border-radius:8px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
+}
+.foot button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.foot button:disabled{opacity:.4;cursor:default}
+.foot .hint{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint)}
+
+.notice{max-width:60ch;margin:12vh auto;text-align:center;padding:0 1.5em}
+.notice h2{font-family:"Archivo",sans-serif;font-size:22px;margin:0 0 .5em}
+.notice p{color:var(--muted);font-size:15px}
+.notice a{color:var(--accent)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<div class="bar" id="bar">
+  <span class="tag">Presenter view</span>
+  <span class="counter">Slide <b id="cur">--</b> / <span id="tot">--</span></span>
+  <button class="timer" id="timer" title="Click to pause, double-click to reset">00:00</button>
+</div>
+
+<main id="main">
+  <div class="card">
+    <h1 id="title">Waiting for the deck...</h1>
+    <ul id="list"></ul>
+  </div>
+  <div class="next" id="nextWrap">
+    <span class="lbl">Next</span><b id="nextTitle"></b>
+  </div>
+</main>
+
+<div class="foot" id="foot">
+  <button id="prev" type="button">&lt; Prev</button>
+  <button id="next" type="button">Next &gt;</button>
+  <span class="hint">Arrow keys work here. Press F in the deck window for fullscreen.</span>
+</div>
+
+<div class="notice hidden" id="notice">
+  <h2>Open this from the presentation</h2>
+  <p>The presenter view syncs with the deck window. Open the
+  <a href="./deck.html">presentation</a> and click <b>Presenter</b> in the bottom-right controls.</p>
+</div>
+
+<script>
+(function(){
+  var op = window.opener;
+  var bar=document.getElementById('bar'), main=document.getElementById('main'),
+      foot=document.getElementById('foot'), notice=document.getElementById('notice');
+
+  function detached(msg){
+    bar.classList.add('hidden'); main.classList.add('hidden'); foot.classList.add('hidden');
+    notice.classList.remove('hidden');
+    if(msg){ notice.querySelector('h2').textContent=msg;
+             notice.querySelector('p').innerHTML='Reopen the <a href="./deck.html">presentation</a> and click <b>Presenter</b> again.'; }
+  }
+
+  if(!op || op.closed || !op.__NB){ detached(); return; }
+
+  var NB = op.__NB;
+  var curEl=document.getElementById('cur'), totEl=document.getElementById('tot'),
+      titleEl=document.getElementById('title'), listEl=document.getElementById('list'),
+      nextWrap=document.getElementById('nextWrap'), nextTitleEl=document.getElementById('nextTitle'),
+      prevBtn=document.getElementById('prev'), nextBtn=document.getElementById('next');
+
+  totEl.textContent = NB.total;
+
+  function render(i){
+    var d = NB.notes[i] || {t:'',n:[]};
+    curEl.textContent = i+1;
+    titleEl.textContent = d.t || 'No notes for this slide';
+    listEl.innerHTML='';
+    (d.n||[]).forEach(function(x){
+      var li=document.createElement('li'); li.innerHTML=x; listEl.appendChild(li);
+    });
+    var nx = NB.notes[i+1];
+    if(nx){ nextWrap.style.display=''; nextTitleEl.textContent = nx.t; }
+    else { nextWrap.style.display='none'; }
+    prevBtn.disabled = i===0;
+    nextBtn.disabled = i===NB.total-1;
+    main.scrollTop=0;
+  }
+
+  // the deck calls this on every slide change
+  window.__NB_SYNC = render;
+
+  function send(n){ try{ if(op.closed) return detached('The deck window was closed'); op.__NB.go(n); }catch(e){ detached('Lost contact with the deck'); } }
+  function cur(){ try{ return op.__NB.current(); }catch(e){ return 0; } }
+
+  prevBtn.addEventListener('click',function(){ send(cur()-1); });
+  nextBtn.addEventListener('click',function(){ send(cur()+1); });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();send(cur()+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();send(cur()-1);}
+    else if(e.key==='Home'){send(0);} else if(e.key==='End'){send(NB.total-1);}
+  });
+
+  // watch for the deck going away
+  setInterval(function(){ if(!op || op.closed){ detached('The deck window was closed'); } }, 1500);
+  window.addEventListener('beforeunload',function(){ try{ if(op && !op.closed && op.__NB_PRESENTER_GONE) op.__NB_PRESENTER_GONE(); }catch(e){} });
+
+  // ---- elapsed timer ----
+  var elapsed=0, running=true, tEl=document.getElementById('timer');
+  function paint(){
+    var m=Math.floor(elapsed/60), s=elapsed%60;
+    tEl.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+    tEl.classList.toggle('paused',!running);
+  }
+  setInterval(function(){ if(running){ elapsed++; paint(); } },1000);
+  var clickT=null;
+  tEl.addEventListener('click',function(){
+    clearTimeout(clickT);
+    clickT=setTimeout(function(){ running=!running; paint(); },220);
+  });
+  tEl.addEventListener('dblclick',function(){
+    clearTimeout(clickT); elapsed=0; running=true; paint();
+  });
+  paint();
+
+  render(cur());
+})();
+</script>
+</body>
+</html>

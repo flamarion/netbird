@@ -228,6 +228,8 @@ figcaption b{color:var(--ink);font-weight:600}
 
 /* ===== presenter notes ===== */
 .notes-btn{font-weight:600}
+.pres-btn{width:auto!important;padding:0 .8em;font-size:11px!important;letter-spacing:.04em}
+.pres-btn.live{background:var(--accent);color:#fff;border-color:var(--accent)}
 .notes-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .notes-panel{position:absolute;left:0;right:0;bottom:0;z-index:30;max-height:44%;overflow:auto;
   background:color-mix(in srgb,var(--surface) 93%,transparent);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
@@ -248,7 +250,7 @@ figcaption b{color:var(--ink);font-weight:600}
   body{background:#fff;overflow:visible;display:block}
   .stage{width:100%;height:auto;box-shadow:none;border:none;border-radius:0}
   .slide{display:flex!important;position:relative;opacity:1!important;page-break-after:always;height:100vh;animation:none}
-  .nav,.dots,.counter,.progress,.hint,.notes-panel,.brand,.decknav{display:none}
+  .nav,.dots,.counter,.progress,.hint,.notes-panel,.brand,.decknav,.pres-btn{display:none}
 }
 </style>
 
@@ -681,6 +683,7 @@ figcaption b{color:var(--ink);font-weight:600}
   <div class="counter"><b id="cur">01</b> / <span id="tot">12</span></div>
   <div class="dots" id="dots"></div>
   <div class="nav">
+    <button id="presBtn" class="pres-btn" type="button" title="Open presenter view in a second window (P)">Presenter</button>
     <button id="notesBtn" class="notes-btn" aria-label="Toggle presenter notes" title="Presenter notes (N)">N</button>
     <button id="prev" aria-label="Previous slide">&lt;</button>
     <button id="next" aria-label="Next slide">&gt;</button>
@@ -791,6 +794,28 @@ figcaption b{color:var(--ink);font-weight:600}
   notesBtn.addEventListener('click',function(){setNotes(!notesOpen)});
   document.getElementById('notesClose').addEventListener('click',function(){setNotes(false)});
 
+  // ---- presenter view (second window) ----
+  var presWin=null, presBtn=document.getElementById('presBtn');
+  window.__NB={notes:NOTES,total:N,go:function(n){go(n)},current:function(){return i}};
+  function presLive(){ return presWin && !presWin.closed; }
+  function presState(){
+    var on=presLive();
+    presBtn.classList.toggle('live',on);
+    presBtn.textContent = on ? 'Presenting' : 'Presenter';
+    // while presenting, keep notes off this screen entirely
+    notesBtn.hidden = on;
+    if(on) setNotes(false);
+  }
+  window.__NB_PRESENTER_GONE=function(){ setTimeout(presState,120); };
+  function openPresenter(){
+    if(presLive()){ presWin.focus(); return; }
+    presWin=window.open('./presenter.html','nbPresenter','width=760,height=820');
+    if(!presWin){ alert('The presenter window was blocked. Allow pop-ups for this site and try again.'); return; }
+    presState();
+  }
+  presBtn.addEventListener('click',openPresenter);
+  setInterval(presState,1500);
+
   function go(n){
     n=Math.max(0,Math.min(N-1,n));
     slides[i].classList.remove('active'); dots[i].classList.remove('on');
@@ -799,6 +824,7 @@ figcaption b{color:var(--ink);font-weight:600}
     cur.textContent=String(i+1).padStart(2,'0');
     prog.style.width=((i)/(N-1)*100)+'%';
     if(notesOpen) renderNotes();
+    if(presLive() && presWin.__NB_SYNC){ try{ presWin.__NB_SYNC(i); }catch(e){} }
   }
   document.getElementById('next').addEventListener('click',function(){go(i+1)});
   document.getElementById('prev').addEventListener('click',function(){go(i-1)});
@@ -808,6 +834,7 @@ figcaption b{color:var(--ink);font-weight:600}
     else if(e.key==='Home'){go(0)} else if(e.key==='End'){go(N-1)}
     else if(e.key==='f'||e.key==='F'){var s=document.getElementById('stage'); if(!document.fullscreenElement){s.requestFullscreen&&s.requestFullscreen()}else{document.exitFullscreen&&document.exitFullscreen()}}
     else if(e.key==='n'||e.key==='N'){e.preventDefault();setNotes(!notesOpen)}
+    else if(e.key==='p'||e.key==='P'){e.preventDefault();openPresenter()}
   });
   prog.style.width='0%';
 })();
